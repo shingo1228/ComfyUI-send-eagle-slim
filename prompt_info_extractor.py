@@ -27,7 +27,7 @@ class PromptInfoExtractor:
             self.load_config(config_filepath)
         else:
             self.config = {
-                "search_class_types": ["KSampler", "KSamplerAdvanced"],
+                "search_class_types": ["KSampler", "KSamplerAdvanced", "KSampler With Refiner (Fooocus)"],
                 "output_format": "Steps: {steps}, Sampler: {sampler_name} {scheduler}, CFG scale: {cfg}, Seed: {seed}, Size: {width}x{height}, Model: {model_name}",
             }
         self.info = self.gather_info()
@@ -44,8 +44,7 @@ class PromptInfoExtractor:
 
     def _show_data(self):
         """For debug. show information of ComfyUI hidden object "prompt" and "extra_onginfo"."""
-        dprint(f"type of prompt:{type(self._prompt)}")
-        dprint(f"Prompt:{self._prompt}")
+        dprint(f"prompt(hidden object){self._prompt}")
 
     def gather_info(self):
         ksampler_items = self.get_ksampler_items()
@@ -147,21 +146,20 @@ class PromptInfoExtractor:
 
         target_node_number = ksampler_item["inputs"][key][0]
         target_node = self._prompt.get(str(target_node_number), {})
-        extracted_text = self.extract_text_from_node_v2(target_node)
+        extracted_text = self.extract_text_from_node_v2(target_node, key)
 
         return extracted_text
 
-    def extract_text_from_node_v2(self, node):
-        # Extract direct text if available
+    def extract_text_from_node_v2(self, node, key):
+        # For CLIPTextEncoder
         direct_text = node.get("inputs", {}).get("text")
+        if isinstance(direct_text, str):
+            return direct_text
 
-        # Extract text_g and text_l and check if they are same or different
+        # For SDXLCLIPTextEncoder
         text_g = node.get("inputs", {}).get("text_g")
         text_l = node.get("inputs", {}).get("text_l")
-
-        if direct_text:
-            return direct_text
-        elif text_g and text_l:
+        if text_g and text_l:
             if text_g == text_l:
                 return text_g
             else:
@@ -171,7 +169,21 @@ class PromptInfoExtractor:
         elif text_l:
             return text_l
 
-        return None
+        # For SDXLPromptStyler
+        node_number = node.get("inputs", {}).get("text")[0]
+        if key == "positive":
+            text_positive = self._prompt[node_number]["inputs"]["text_positive"]
+            if text_positive:
+                return text_positive
+        else:
+            text_negative = self._prompt[node_number]["inputs"]["text_negative"]
+            if text_negative:
+                return text_negative
+
+        if DEBUG:
+            return "Prompt parse error"
+        else:
+            return None
 
     def format_info(self, info_dict):
         """Format the gathered information based on the configuration."""
