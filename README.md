@@ -44,6 +44,11 @@ In this extension node, we achieve the following functions from the information 
    - Sampler: `KSampler`,`KSamplerAdvanced`
    - Latent Image: `Empty Latent Image`
    - CLIP: `ClIP TextEncoder(Prompt)`,`CLIPTextEncodeSDXL`
+
+- Provisional Implementation support
+   - Sampler: `KSampler With Refiner (Fooocus)`
+   - Prompt: `SDXL Prompt Styler`
+
 - Even if the workflow is composed of the above standard nodes, due to the high degree of freedom in ComfyUI configuration, there is a possibility that the expected information cannot be obtained. (In that case, it may be difficult to respond or logically impossible to respond).
 - For nodes other than the above (both standard and extended), I will proceed with operation verification and support from the nodes with the desired features.
 
@@ -57,3 +62,4 @@ In this extension node, we achieve the following functions from the information 
 
 ## Change History
 2023/08/17 Initial release.
+2023/08/18 Provisional Implementation support for `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` 

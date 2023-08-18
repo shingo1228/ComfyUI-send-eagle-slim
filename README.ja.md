@@ -41,11 +41,14 @@ ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt
 ## 制限事項
 - ワークフロー内で複数の`KSampler`ノード、及び`KSamplerAdvanced`ノードが存在した場合、暗黙的に採番されているノード番号（正式項目名は不明）が最小の物を生成基準ノードとします。これはSamplerノードの目的が「生成用」「Refiner用」「Hires.fix用」なのか区別出来ないためです。よって「生成用」のプロンプトと、「Hires.fix用」のプロンプトが異なって定義されているといったワークフローの場合、目的の生成プロンプトが取得できない可能性があります。
 - 動作確認したノードはComfyUI標準のノードのうち、以下となります。
-   - サンプラー：`KSampler`,`KSamplerAdvanced`
+   - Sampler：`KSampler`,`KSamplerAdvanced`
    - Latentイメージ：`Empty Latent Image`
    - CLIP：`ClIP TextEncoder(Prompt)`,`CLIPTextEncodeSDXL`
 - 動作確認した拡張ノードは以下となります。
    - Latentイメージ: [ComfyUI-SDXL-EmptyLatentImage](https://github.com/shingo1228/ComfyUI-SDXL-EmptyLatentImage)
+- 暫定対応した拡張ノード
+   - Sampler: `KSampler With Refiner (Fooocus)`
+   - Prompt: `SDXL Prompt Styler`
 
 - 上記、標準ノードでワークフローが構成されていた場合でも、ComfyUIは構成の自由度が非常に高いため、期待する情報を取得できない可能性があります。（その場合、対応が困難、若しくは論理的に対応できない可能性があります）
 - 上記以外のノード（標準、拡張問わず）については、私が使いたい機能を持ったノードから動作確認、対応を進めていきます
@@ -58,3 +61,4 @@ ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt
 2. `git pull`
 ## 変更履歴
 2023/08/17 初期版リリース
+2023/08/18 `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` に暫定対応
