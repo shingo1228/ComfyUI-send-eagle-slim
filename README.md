@@ -61,5 +61,5 @@ In this extension node, we achieve the following functions from the information 
 2. `git pull`
 
 ## Change History
-2023/08/17 Initial release.
-2023/08/18 Provisional Implementation support for `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` 
+- 2023/08/17 Initial release.
+- 2023/08/18 Provisional Implementation support for `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler`.

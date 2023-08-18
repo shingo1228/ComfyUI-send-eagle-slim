@@ -60,5 +60,5 @@ ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt
 1. Navigate to the cloned repo e.g. `custom_nodes/ComfyUI-send-eagle`
 2. `git pull`
 ## 変更履歴
-2023/08/17 初期版リリース
-2023/08/18 `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` に暫定対応
+- 2023/08/17 初期版リリース
+- 2023/08/18 `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` に暫定対応
