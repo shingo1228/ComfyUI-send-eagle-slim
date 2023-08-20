@@ -10,10 +10,10 @@ from datetime import datetime
 
 import folder_paths
 
-sys.path.append(os.path.dirname(__file__))
-from prompt_info_extractor import PromptInfoExtractor
+from .prompt_info_extractor import PromptInfoExtractor
 
 DEBUG = False
+FORCE_LOG = False
 
 
 def dprint(str):
@@ -53,7 +53,7 @@ class SendEagle:
         prompt=None,
         extra_pnginfo=None,
     ):
-        def initialize_defaults(prompt, extra_pnginfo):
+        def write_prompt(prompt, extra_pnginfo):
             log_file_name = os.path.join(
                 os.path.dirname(__file__), "prompt_decode_err.log"
             )
@@ -64,11 +64,16 @@ class SendEagle:
                     f.write('\n\n"extra_pnginfo:"\n')
                     json.dump(extra_pnginfo, f, indent=4, ensure_ascii=False)
 
+        def initialize_defaults(prompt, extra_pnginfo):
+            write_prompt(prompt, extra_pnginfo)
             print("check prompt_decode_err.log")
             traceback.print_exc()
             return "", [], "unknown", "00", "000000"
 
         try:
+            if FORCE_LOG:
+                write_prompt(prompt, extra_pnginfo)
+
             gen_data = PromptInfoExtractor(prompt)
 
             Eagle_annotation_txt = gen_data.formatted_annotation()
