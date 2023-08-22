@@ -62,3 +62,4 @@ ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt
 ## 変更履歴
 - 2023/08/17 初期版リリース
 - 2023/08/18 `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` に暫定対応
+- 2023/08/22 `prompt`情報を解析しEagleに送信するフラグを追加

@@ -36,6 +36,7 @@ class SendEagle:
                     "INT",
                     {"default": 80, "min": 1, "max": 100, "step": 1},
                 ),
+                "send_prompt": ("BOOLEAN", {"default": True, "label_on": "enabled", "label_off": "disabled"}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -50,6 +51,7 @@ class SendEagle:
         images,
         compression=80,
         lossless_webp="lossy",
+        send_prompt=True,
         prompt=None,
         extra_pnginfo=None,
     ):
@@ -73,15 +75,15 @@ class SendEagle:
         try:
             if FORCE_LOG:
                 write_prompt(prompt, extra_pnginfo)
+            if send_prompt:
+                gen_data = PromptInfoExtractor(prompt)
 
-            gen_data = PromptInfoExtractor(prompt)
+                Eagle_annotation_txt = gen_data.formatted_annotation()
+                Eagle_tags = gen_data.get_prompt_tags()
 
-            Eagle_annotation_txt = gen_data.formatted_annotation()
-            Eagle_tags = gen_data.get_prompt_tags()
-
-            fn_modelname, _ = os.path.splitext(gen_data.info["model_name"])
-            fn_num_of_smp = gen_data.info["steps"]
-            fn_seed = gen_data.info["seed"]
+                fn_modelname, _ = os.path.splitext(gen_data.info["model_name"])
+                fn_num_of_smp = gen_data.info["steps"]
+                fn_seed = gen_data.info["seed"]
 
         except (json.JSONDecodeError, KeyError, TypeError, Exception) as e:
             if isinstance(e, json.JSONDecodeError):
@@ -121,18 +123,28 @@ class SendEagle:
             width, height = img.size
             fn_width = width
             fn_height = height
+            if send_prompt:
+                filename = f"{util.get_datetime_str_msec()}-{fn_modelname}-Smp-{fn_num_of_smp}-{fn_seed}-{fn_width}-{fn_height}.webp"
+            else:
+                filename = f"{util.get_datetime_str_msec()}-{fn_width}-{fn_height}.webp"
 
-            filename = f"{util.get_datetime_str_msec()}-{fn_modelname}-Smp-{fn_num_of_smp}-{fn_seed}-{fn_width}-{fn_height}.webp"
             filefullpath = os.path.join(full_output_folder, filename)
 
             img.save(filefullpath, quality=compression, exif=imgexif, lossless=lossless)
 
-            item = {
-                "path": filefullpath,
-                "name": filename,
-                "annotation": Eagle_annotation_txt,
-                "tags": Eagle_tags,
-            }
+            if send_prompt:
+                item = {
+                    "path": filefullpath,
+                    "name": filename,
+                    "annotation": Eagle_annotation_txt,
+                    "tags": Eagle_tags,
+                }
+            else:
+                item = {
+                    "path": filefullpath,
+                    "name": filename,
+                }
+
             _ret = eagle_api.add_item_from_path(data=item)
             dprint(_ret)
 

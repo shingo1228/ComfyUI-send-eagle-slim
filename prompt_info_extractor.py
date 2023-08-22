@@ -69,9 +69,16 @@ class PromptInfoExtractor:
             "model_name": model_name,
             "width": latent_image_info["inputs"]["width"],
             "height": latent_image_info["inputs"]["height"],
-            "prompt": prompt_text["prompt"],
-            "negative": prompt_text["negative"],
         }
+        if "prompt" in prompt_text:
+            info_dict["prompt"] = prompt_text["prompt"]
+        else:
+            info_dict["prompt"] = ""
+
+        if "negative" in prompt_text:
+            info_dict["negative"] = prompt_text["negative"]
+        else:
+            info_dict["negative"] = ""
 
         return info_dict
 
@@ -170,15 +177,18 @@ class PromptInfoExtractor:
             return text_l
 
         # For SDXLPromptStyler
-        node_number = node.get("inputs", {}).get("text")[0]
-        if key == "positive":
-            text_positive = self._prompt[node_number]["inputs"]["text_positive"]
-            if text_positive:
-                return text_positive
-        else:
-            text_negative = self._prompt[node_number]["inputs"]["text_negative"]
-            if text_negative:
-                return text_negative
+        try:
+            node_number = node.get("inputs", {}).get("text")[0]
+            if key == "positive":
+                text_positive = self._prompt[node_number]["inputs"]["text_positive"]
+                if text_positive:
+                    return text_positive
+            else:
+                text_negative = self._prompt[node_number]["inputs"]["text_negative"]
+                if text_negative:
+                    return text_negative
+        except(Exception) as e:
+            return None
 
         if DEBUG:
             return "Prompt parse error"

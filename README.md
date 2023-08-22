@@ -63,3 +63,4 @@ In this extension node, we achieve the following functions from the information 
 ## Change History
 - 2023/08/17 Initial release.
 - 2023/08/18 Provisional Implementation support for `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler`.
+- 2023/08/22 Added flag to parse `prompt` information and send to Eagle.
