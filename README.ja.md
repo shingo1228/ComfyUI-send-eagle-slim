@@ -8,13 +8,15 @@
 ![](misc/workflow.svg)
 
 ## 機能
+![](misc/sss_node_visual.jpg)
+
 入力:`image`で入力された生成画像を、webp形式でローカルで起動中のEagleに連携します。<br>
 webp形式は非可逆圧縮（画質設定）、及び可逆圧縮形式を選択可能です。<br>
 
 この拡張ノードは、ComfyUIの出力ディレクトリに"YYYY-MM-DD"形式のサブフォルダを作成します。
-画像ファイルのネーミングルールは、以下の通りで、私がAUTOMATIC1111氏のStableDiffusion webuiで使用している設定を踏襲しています。現在、このサブフォルダ作成、及びファイル名は変更できません。<br>
+画像ファイルのネーミングルールは、以下の通りで、私がAUTOMATIC1111氏のStableDiffusion webuiで使用している設定を踏襲しています。現在、このサブフォルダ作成処理は変更できません。<br>
 
-./ComfyUI/output/YYYY-MM-DD/YYYYMMDD_HHMMss_SSSSSS-{`model_name`}-Smp-{`steps`}-{`seed`}-{`FinalImage_width`}-{`FinalImage_height`}.webp
+./ComfyUI/output/YYYY-MM-DD/YYYYMMDD_HHMMss_SSSSSS-{`FinalImage_width`}-{`FinalImage_height`}.webp
 
 ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt`及び`extra_pnginfo`というオブジェクトを受け取ります。`prompt`には、json形式でワークフローのノード間連携情報が記録されています。また`extra_pnginfo`には、json形式でワークフローを構成するノードの詳細情報（ノードの名称、リスト項目、座標、大きさなど）が記録されています。この二つの情報を生成した画像ファイルに埋め込むことで、画像をComfyUIにドロップすることで生成時のノード構成を再現する機能を実現しています。
 
@@ -22,7 +24,7 @@ ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt
 
 - `prompt`及び`extra_pnginfo`をwebp形式のexif情報に埋め込み、画像ドロップによるワークフローの再現
 ![](misc/sss_exif.jpg)
-- `prompt`のjson情報を解析し、`KSampler`ノード及び`KSamplerAdvanced`ノード（以下、生成基準ノード）から以下の生成情報をEagleのメモ欄（annotation）に登録
+- `send_prompt`を有効にした場合、`prompt`のjson情報を解析し、`KSampler`ノード及び`KSamplerAdvanced`ノード（以下、生成基準ノード）から以下の生成情報をEagleのメモ欄（annotation）に登録
    - 「生成Step数」「サンプラー名」「スケジューラ名」「CFCスケール」「Seed値」
    - 生成基準ノードの入力:`latent`の上流ノード（`Empty Latent Image`ノードを想定）から、Latentの「幅」と「高さ」
    - 生成基準ノードの入力:`model`の上流ノードから「モデル名」（中間に`Load LoRA`ノードが存在していた場合は無視して`ckpt_name`を再帰的に探しにいきます）
@@ -63,3 +65,4 @@ ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt
 - 2023/08/17 初期版リリース
 - 2023/08/18 `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` に暫定対応
 - 2023/08/22 `prompt`情報を解析しEagleに送信するフラグを追加
+- 2023/08/31 `prompt`、`extra_pnginfo`を**Eagleに送らない（send_promptをdisable）**をデフォルトに変更

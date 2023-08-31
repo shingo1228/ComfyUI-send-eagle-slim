@@ -9,12 +9,14 @@ This README.md is translated by ChatGPT Plus with Code Interpreter from [Japanes
 ![](misc/workflow.svg)
 
 ## Features
+![](misc/sss_node_visual.jpg)
+
 Sends the image inputted through `image` in webp format to Eagle running locally. 
 You can choose between lossy compression (quality settings) and lossless compression.
 This extension node creates a subfolder in the ComfyUI output directory in the "YYYY-MM-DD" format.
 The naming rule for image files is as follows, which follows the settings I use in AUTOMATIC1111's StableDiffusion webui. Currently, you cannot change this subfolder creation or filename:
 
-./ComfyUI/output/YYYY-MM-DD/YYYYMMDD_HHMMss_SSSSSS-{`model_name`}-Smp-{`steps`}-{`seed`}-{`FinalImage_width`}-{`FinalImage_height`}.webp
+./ComfyUI/output/YYYY-MM-DD/YYYYMMDD_HHMMss_SSSSSS-{`FinalImage_width`}-{`FinalImage_height`}.webp
 
 In ComfyUI, when processing reaches that node, it implicitly receives objects called `prompt` and `extra_pnginfo`. The `prompt` contains workflow inter-node linkage information in json format, and `extra_pnginfo` contains detailed information (node name, list items, coordinates, size, etc.) of the nodes that make up the workflow in json format. By embedding this information in the generated image file, this feature allows you to recreate the node configuration at the time of generation by dropping the image onto ComfyUI.
 
@@ -22,7 +24,7 @@ In this extension node, we achieve the following functions from the information 
 
 - Embed `prompt` and `extra_pnginfo` in webp format exif information and recreate workflow by image drop.<br>
 ![](misc/sss_exif.jpg)
-- Analyze json information of `prompt` and register the following generation information in the memo (annotation) of Eagle from `KSampler` node and `KSamplerAdvanced` node (hereinafter referred to as generation standard node):
+- If `send_prompt` is enabled, analyze json information of `prompt` and register the following generation information in the memo (annotation) of Eagle from `KSampler` node and `KSamplerAdvanced` node (hereinafter referred to as generation standard node):
    - "Number of generation steps", "Sampler name", "Scheduler name", "CFC scale", "Seed value"
    - Width and height of Latent from the upstream node of input:`latent` of the generation criterion node (assuming `Empty Latent Image` node).
    - "Model name" from the upstream node of input:`model` of the generation criterion node (if there is a `Load LoRA` node in between, it will be ignored and `ckpt_name` will be searched recursively).
@@ -64,3 +66,4 @@ In this extension node, we achieve the following functions from the information 
 - 2023/08/17 Initial release.
 - 2023/08/18 Provisional Implementation support for `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler`.
 - 2023/08/22 Added flag to parse `prompt` information and send to Eagle.
+- 2023/08/31 Changed `prompt` and `extra_pnginfo` to default to **not send to Eagle (disable send_prompt)**.
