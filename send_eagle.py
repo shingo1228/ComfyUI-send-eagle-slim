@@ -19,6 +19,7 @@ def dprint(str):
     if DEBUG:
         print(f"Debug:{str}")
 
+
 class SendEagle:
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()
@@ -56,20 +57,21 @@ class SendEagle:
         prompt=None,
         extra_pnginfo=None,
     ):
-
-        if FORCE_WRITE_PROMPT: # Force write prompt and extra_pnginfo to log (for debug)
+        if (
+            FORCE_WRITE_PROMPT
+        ):  # Force write prompt and extra_pnginfo to log (for debug)
             util.write_prompt(prompt, extra_pnginfo)
 
         if send_prompt:
             try:
-                    gen_data = PromptInfoExtractor(prompt)
+                gen_data = PromptInfoExtractor(prompt)
 
-                    Eagle_annotation_txt = gen_data.formatted_annotation()
-                    Eagle_tags = gen_data.get_prompt_tags()
+                Eagle_annotation_txt = gen_data.formatted_annotation()
+                Eagle_tags = gen_data.get_prompt_tags()
 
-                    fn_modelname, _ = os.path.splitext(gen_data.info["model_name"])
-                    fn_num_of_smp = gen_data.info["steps"]
-                    fn_seed = gen_data.info["seed"]
+                fn_modelname, _ = os.path.splitext(gen_data.info["model_name"])
+                fn_num_of_smp = gen_data.info["steps"]
+                fn_seed = gen_data.info["seed"]
 
             except (json.JSONDecodeError, KeyError, TypeError, Exception) as e:
                 if isinstance(e, json.JSONDecodeError):
@@ -81,7 +83,7 @@ class SendEagle:
                 else:
                     print(f"Process error occurred. detail:{e}")
                 (
-                        Eagle_annotation_txt,
+                    Eagle_annotation_txt,
                     Eagle_tags,
                     fn_modelname,
                     fn_num_of_smp,
@@ -115,10 +117,7 @@ class SendEagle:
             filefullpath = os.path.join(full_output_folder, filename)
             img.save(filefullpath, quality=compression, exif=imgexif, lossless=lossless)
 
-            item = {
-                "path": filefullpath,
-                "name": filename
-            }
+            item = {"path": filefullpath, "name": filename}
 
             if send_prompt:
                 item["annotation"] = Eagle_annotation_txt
@@ -143,9 +142,7 @@ class util:
 
     @staticmethod
     def write_prompt(prompt, extra_pnginfo):
-        log_file_name = os.path.join(
-        os.path.dirname(__file__), "prompt_decode_err.log"
-        )
+        log_file_name = os.path.join(os.path.dirname(__file__), "prompt_decode_err.log")
         with open(log_file_name, "w", encoding="utf-8") as f:
             f.write('"prompt:"\n')
             json.dump(prompt, f, indent=4, ensure_ascii=False)
@@ -160,23 +157,25 @@ class util:
         return f"{date_time_str}_{now.microsecond:06}"
 
     @staticmethod
-    def getExifFromPrompt(emptyExifData, prompt, extra_pnginfo):
+    def getExifFromPrompt(
+        emptyExifData: Image.Exif, prompt, extra_pnginfo
+    ) -> Image.Exif:
         """Generate exif information for webp format from hidden items "prompt" and "extra_pnginfo"""
-        workflowmetadata = str()
-        promptstr = str()
-
         imgexif = emptyExifData
+
+        # Add PromptString to EXIF position 0x010f (Exif.Image.Make)
         if prompt is not None:
-            promptstr = "".join(json.dumps(prompt))  # prepare prompt String
-            imgexif[0x010F] = (
-                "Prompt:" + promptstr
-            )  # Add PromptString to EXIF position 0x010f (Exif.Image.Make)
+            promptstr = "".join(json.dumps(prompt))
+            imgexif[0x010F] = "Prompt:" + promptstr
+
+        # Add Workflowstring to EXIF position 0x010e (Exif.Image.ImageDescription)
         if extra_pnginfo is not None:
+            workflowmetadata = str()
             for x in extra_pnginfo:
                 workflowmetadata += "".join(json.dumps(extra_pnginfo[x]))
-        imgexif[0x010E] = (
-            "Workflow:" + workflowmetadata
-        )  # Add Workflowstring to EXIF position 0x010e (Exif.Image.ImageDescription)
+
+            imgexif[0x010E] = "Workflow:" + workflowmetadata
+
         return imgexif
 
 
