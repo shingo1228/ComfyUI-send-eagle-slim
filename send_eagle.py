@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import numpy as np
 import traceback
@@ -13,13 +12,12 @@ import folder_paths
 from .prompt_info_extractor import PromptInfoExtractor
 
 DEBUG = False
-FORCE_LOG = False
+FORCE_WRITE_PROMPT = False
 
 
 def dprint(str):
     if DEBUG:
         print(f"Debug:{str}")
-
 
 class SendEagle:
     def __init__(self):
@@ -36,7 +34,10 @@ class SendEagle:
                     "INT",
                     {"default": 80, "min": 1, "max": 100, "step": 1},
                 ),
-                "send_prompt": ("BOOLEAN", {"default": True, "label_on": "enabled", "label_off": "disabled"}),
+                "send_prompt": (
+                    "BOOLEAN",
+                    {"default": False, "label_on": "enabled", "label_off": "disabled"},
+                ),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -51,56 +52,41 @@ class SendEagle:
         images,
         compression=80,
         lossless_webp="lossy",
-        send_prompt=True,
+        send_prompt=False,
         prompt=None,
         extra_pnginfo=None,
     ):
-        def write_prompt(prompt, extra_pnginfo):
-            log_file_name = os.path.join(
-                os.path.dirname(__file__), "prompt_decode_err.log"
-            )
-            with open(log_file_name, "w", encoding="utf-8") as f:
-                f.write('"prompt:"\n')
-                json.dump(prompt, f, indent=4, ensure_ascii=False)
-                if extra_pnginfo is not None:
-                    f.write('\n\n"extra_pnginfo:"\n')
-                    json.dump(extra_pnginfo, f, indent=4, ensure_ascii=False)
 
-        def initialize_defaults(prompt, extra_pnginfo):
-            write_prompt(prompt, extra_pnginfo)
-            print("check prompt_decode_err.log")
-            traceback.print_exc()
-            return "", [], "unknown", "00", "000000"
+        if FORCE_WRITE_PROMPT: # Force write prompt and extra_pnginfo to log (for debug)
+            util.write_prompt(prompt, extra_pnginfo)
 
-        try:
-            if FORCE_LOG:
-                write_prompt(prompt, extra_pnginfo)
-            if send_prompt:
-                gen_data = PromptInfoExtractor(prompt)
+        if send_prompt:
+            try:
+                    gen_data = PromptInfoExtractor(prompt)
 
-                Eagle_annotation_txt = gen_data.formatted_annotation()
-                Eagle_tags = gen_data.get_prompt_tags()
+                    Eagle_annotation_txt = gen_data.formatted_annotation()
+                    Eagle_tags = gen_data.get_prompt_tags()
 
-                fn_modelname, _ = os.path.splitext(gen_data.info["model_name"])
-                fn_num_of_smp = gen_data.info["steps"]
-                fn_seed = gen_data.info["seed"]
+                    fn_modelname, _ = os.path.splitext(gen_data.info["model_name"])
+                    fn_num_of_smp = gen_data.info["steps"]
+                    fn_seed = gen_data.info["seed"]
 
-        except (json.JSONDecodeError, KeyError, TypeError, Exception) as e:
-            if isinstance(e, json.JSONDecodeError):
-                print(f"Json decode error occurred. detail:{e}")
-            elif isinstance(e, KeyError):
-                print(f"Key error occurred. detail:{e}")
-            elif isinstance(e, TypeError):
-                print(f"Type error occurred. detail:{e}")
-            else:
-                print(f"Process error occurred. detail:{e}")
-            (
-                Eagle_annotation_txt,
-                Eagle_tags,
-                fn_modelname,
-                fn_num_of_smp,
-                fn_seed,
-            ) = initialize_defaults(prompt, extra_pnginfo)
+            except (json.JSONDecodeError, KeyError, TypeError, Exception) as e:
+                if isinstance(e, json.JSONDecodeError):
+                    print(f"Json decode error occurred. detail:{e}")
+                elif isinstance(e, KeyError):
+                    print(f"Key error occurred. detail:{e}")
+                elif isinstance(e, TypeError):
+                    print(f"Type error occurred. detail:{e}")
+                else:
+                    print(f"Process error occurred. detail:{e}")
+                (
+                        Eagle_annotation_txt,
+                    Eagle_tags,
+                    fn_modelname,
+                    fn_num_of_smp,
+                    fn_seed,
+                ) = util.initialize_defaults(prompt, extra_pnginfo)
 
         subfolder_name = datetime.now().strftime("%Y-%m-%d")
 
@@ -121,29 +107,22 @@ class SendEagle:
             imgexif = util.getExifFromPrompt(emptyExifData, prompt, extra_pnginfo)
 
             width, height = img.size
-            fn_width = width
-            fn_height = height
             if send_prompt:
-                filename = f"{util.get_datetime_str_msec()}-{fn_modelname}-Smp-{fn_num_of_smp}-{fn_seed}-{fn_width}-{fn_height}.webp"
+                filename = f"{util.get_datetime_str_msec()}-{fn_modelname}-Smp-{fn_num_of_smp}-{fn_seed}-{width}-{height}.webp"
             else:
-                filename = f"{util.get_datetime_str_msec()}-{fn_width}-{fn_height}.webp"
+                filename = f"{util.get_datetime_str_msec()}-{width}-{height}.webp"
 
             filefullpath = os.path.join(full_output_folder, filename)
-
             img.save(filefullpath, quality=compression, exif=imgexif, lossless=lossless)
 
+            item = {
+                "path": filefullpath,
+                "name": filename
+            }
+
             if send_prompt:
-                item = {
-                    "path": filefullpath,
-                    "name": filename,
-                    "annotation": Eagle_annotation_txt,
-                    "tags": Eagle_tags,
-                }
-            else:
-                item = {
-                    "path": filefullpath,
-                    "name": filename,
-                }
+                item["annotation"] = Eagle_annotation_txt
+                item["tags"] = Eagle_tags
 
             _ret = eagle_api.add_item_from_path(data=item)
             dprint(_ret)
@@ -156,6 +135,24 @@ class SendEagle:
 
 
 class util:
+    def initialize_defaults(prompt, extra_pnginfo):
+        util.write_prompt(prompt, extra_pnginfo)
+        print("check prompt_decode_err.log")
+        traceback.print_exc()
+        return "", [], "unknown", "00", "000000"
+
+    @staticmethod
+    def write_prompt(prompt, extra_pnginfo):
+        log_file_name = os.path.join(
+        os.path.dirname(__file__), "prompt_decode_err.log"
+        )
+        with open(log_file_name, "w", encoding="utf-8") as f:
+            f.write('"prompt:"\n')
+            json.dump(prompt, f, indent=4, ensure_ascii=False)
+            if extra_pnginfo is not None:
+                f.write('\n\n"extra_pnginfo:"\n')
+                json.dump(extra_pnginfo, f, indent=4, ensure_ascii=False)
+
     @staticmethod
     def get_datetime_str_msec():
         now = datetime.now()
