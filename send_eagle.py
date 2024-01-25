@@ -37,11 +37,11 @@ class SendEagleWithText:
                 ),
                 "prompt_text": (
                     "STRING",
-                    {"multiline": True},
+                    {"forceInput": True, "multiline": True},
                 ),
                 "negative_text": (
                     "STRING",
-                    {"multiline": True},
+                    {"forceInput": True, "multiline": True},
                 ),
                 "memo_text": (
                     "STRING",
