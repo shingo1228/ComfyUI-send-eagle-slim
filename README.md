@@ -67,3 +67,4 @@ In this extension node, we achieve the following functions from the information 
 - 2023/08/18 Provisional Implementation support for `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler`.
 - 2023/08/22 Added flag to parse `prompt` information and send to Eagle.
 - 2023/08/31 Changed `prompt` and `extra_pnginfo` to default to **not send to Eagle (disable send_prompt)**.
+- 2024/01 25 Add New Node "Send Eagle with text"

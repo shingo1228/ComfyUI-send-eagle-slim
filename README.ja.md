@@ -66,3 +66,4 @@ ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt
 - 2023/08/18 `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` に暫定対応
 - 2023/08/22 `prompt`情報を解析しEagleに送信するフラグを追加
 - 2023/08/31 `prompt`、`extra_pnginfo`を**Eagleに送らない（send_promptをdisable）**をデフォルトに変更
+- 2024/01/25 新規ノード "Send Eagle with text"を追加
