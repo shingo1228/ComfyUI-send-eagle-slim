@@ -20,6 +20,99 @@ def dprint(str):
         print(f"Debug:{str}")
 
 
+class SendEagleWithText:
+    def __init__(self):
+        self.output_dir = folder_paths.get_output_directory()
+        self.type = "output"
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "lossless_webp": (["lossy", "lossless"],),
+                "compression": (
+                    "INT",
+                    {"default": 80, "min": 1, "max": 100, "step": 1},
+                ),
+                "prompt_text": (
+                    "STRING",
+                    {"multiline": True},
+                ),
+                "negative_text": (
+                    "STRING",
+                    {"multiline": True},
+                ),
+                "memo_text": (
+                    "STRING",
+                    {"multiline": True},
+                ),
+            },
+            "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "add_item"
+    OUTPUT_NODE = True
+    CATEGORY = "EagleTools"
+
+    def add_item(
+        self,
+        images,
+        compression=80,
+        lossless_webp="lossy",
+        prompt_text=None,
+        negative_text=None,
+        memo_text=None,
+        prompt=None,
+        extra_pnginfo=None,
+    ):
+        if (
+            FORCE_WRITE_PROMPT
+        ):  # Force write prompt and extra_pnginfo to log (for debug)
+            util.write_prompt(prompt, extra_pnginfo)
+
+        subfolder_name = datetime.now().strftime("%Y-%m-%d")
+
+        full_output_folder = os.path.join(self.output_dir, subfolder_name)
+        if not os.path.exists(full_output_folder):
+            os.makedirs(full_output_folder)
+
+        lossless = lossless_webp == "lossless"
+
+        results = list()
+        eagle_api = EagleAPI()
+        for image in images:
+            i = 255.0 * image.cpu().numpy()
+            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+
+            # get the (empty) Exif data of the generated Picture
+            emptyExifData = img.getexif()
+            imgexif = util.getExifFromPrompt(emptyExifData, prompt, extra_pnginfo)
+
+            width, height = img.size
+
+            filename = f"{util.get_datetime_str_msec()}-{width}-{height}.webp"
+
+            filefullpath = os.path.join(full_output_folder, filename)
+            img.save(filefullpath, quality=compression, exif=imgexif, lossless=lossless)
+
+            item = {"path": filefullpath, "name": filename}
+
+            item["annotation"] = util.make_annotation_text(
+                prompt_text, negative_text, memo_text
+            )
+
+            _ret = eagle_api.add_item_from_path(data=item)
+            dprint(_ret)
+
+            results.append(
+                {"filename": filename, "subfolder": subfolder_name, "type": self.type}
+            )
+
+        return {"ui": {"images": results}}
+
+
 class SendEagle:
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()
@@ -141,6 +234,26 @@ class util:
         return "", [], "unknown", "00", "000000"
 
     @staticmethod
+    def make_annotation_text(prompt_text, negative_text, memo_text):
+        def is_valid_text(text):
+            return isinstance(text, str) and text.strip() and text != "undefined"
+
+        tmp_annotation = ""
+
+        if is_valid_text(prompt_text):
+            tmp_annotation += prompt_text
+
+        if is_valid_text(negative_text):
+            tmp_annotation += "\n" if tmp_annotation.strip() else ""
+            tmp_annotation += "Negative prompt:" + negative_text
+
+        if is_valid_text(memo_text):
+            tmp_annotation += "\n" if tmp_annotation.strip() else ""
+            tmp_annotation += "Memo:" + memo_text
+
+        return tmp_annotation
+
+    @staticmethod
     def write_prompt(prompt, extra_pnginfo):
         log_file_name = os.path.join(os.path.dirname(__file__), "prompt_decode_err.log")
         with open(log_file_name, "w", encoding="utf-8") as f:
@@ -206,4 +319,5 @@ class EagleAPI:
 
 NODE_CLASS_MAPPINGS = {
     "Send Webp Image to Eagle": SendEagle,
+    "Send Eagle with text": SendEagleWithText,
 }
