@@ -84,6 +84,13 @@ class util:
 
     @staticmethod
     def get_prompt_tags(prompt_text: str) -> list:
+        if (
+            not isinstance(prompt_text, str)
+            or not prompt_text.strip()
+            or prompt_text == "undefined"
+        ):
+            return []
+
         cleaned_string = re.sub(r":\d+\.\d+", "", prompt_text)
         items = cleaned_string.split(",")
         return [
