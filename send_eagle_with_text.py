@@ -1,8 +1,9 @@
 import os
 import numpy as np
-import logging
+import json
 
 from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 from datetime import datetime
 
 import folder_paths
@@ -11,8 +12,6 @@ from .util import util
 from .eagle_api import EagleAPI
 
 FORCE_WRITE_PROMPT = False
-
-# logging.basicConfig(level=logging.DEBUG)
 
 
 class SendEagleWithText:
@@ -25,6 +24,7 @@ class SendEagleWithText:
         return {
             "required": {
                 "images": ("IMAGE",),
+                "format": (["webp", "png"],),
                 "lossless_webp": (
                     "BOOLEAN",
                     {"default": False, "label_on": "lossless", "label_off": "lossy"},
@@ -57,18 +57,15 @@ class SendEagleWithText:
     def add_item(
         self,
         images,
-        compression=80,
+        format="webp",
         lossless_webp=False,
+        compression=80,
         prompt_text=None,
         negative_text=None,
         memo_text=None,
         prompt=None,
         extra_pnginfo=None,
     ):
-        # Force write prompt and extra_pnginfo to log (for debug)
-        if FORCE_WRITE_PROMPT:
-            util.write_prompt(prompt, extra_pnginfo)
-
         subfolder_name = datetime.now().strftime("%Y-%m-%d")
 
         full_output_folder = os.path.join(self.output_dir, subfolder_name)
@@ -79,32 +76,56 @@ class SendEagleWithText:
         eagle_api = EagleAPI()
 
         for image in images:
-            i = 255.0 * image.cpu().numpy()
-            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+            # Make Image object
+            normalized_pixels = 255.0 * image.cpu().numpy()
+            img = Image.fromarray(np.clip(normalized_pixels, 0, 255).astype(np.uint8))
 
-            # get the (empty) Exif data of the generated Picture
-            emptyExifData = img.getexif()
-            imgexif = util.get_exif_from_prompt(emptyExifData, prompt, extra_pnginfo)
-
+            file_name = ""
+            file_full_path = ""
             width, height = img.size
-            filename = f"{util.get_datetime_str_msec()}-{width}-{height}.webp"
-            filefullpath = os.path.join(full_output_folder, filename)
-            img.save(
-                filefullpath, quality=compression, exif=imgexif, lossless=lossless_webp
-            )
 
-            item = {"path": filefullpath, "name": filename}
+            if format == "webp":
+                # Save webp image file
+                file_name = f"{util.get_datetime_str_msec()}-{width}-{height}.webp"
+                file_full_path = os.path.join(full_output_folder, file_name)
 
+                exif_data = util.get_exif_from_prompt(
+                    img.getexif(), prompt, extra_pnginfo
+                )
+
+                img.save(
+                    file_full_path,
+                    quality=compression,
+                    exif=exif_data,
+                    lossless=lossless_webp,
+                )
+
+            else:
+                # Save png image file
+                file_name = f"{util.get_datetime_str_msec()}-{width}-{height}.png"
+                file_full_path = os.path.join(full_output_folder, file_name)
+                metadata = PngInfo()
+                if prompt is not None:
+                    metadata.add_text("prompt", json.dumps(prompt))
+                if extra_pnginfo is not None:
+                    for x in extra_pnginfo:
+                        metadata.add_text(x, json.dumps(extra_pnginfo[x]))
+
+                img.save(file_full_path, pnginfo=metadata, compress_level=4)
+
+                util.save_png_image(img, file_full_path, prompt, extra_pnginfo)
+
+            # Send image to Eagle
+            item = {"path": file_full_path, "name": file_name}
             item["annotation"] = util.make_annotation_text(
                 prompt_text, negative_text, memo_text
             )
             item["tags"] = util.get_prompt_tags(prompt_text)
 
             _ret = eagle_api.add_item_from_path(data=item)
-            logging.debug(_ret)
 
             results.append(
-                {"filename": filename, "subfolder": subfolder_name, "type": self.type}
+                {"filename": file_name, "subfolder": subfolder_name, "type": self.type}
             )
 
         return {"ui": {"images": results}}
