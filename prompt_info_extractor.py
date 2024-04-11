@@ -27,7 +27,7 @@ class PromptInfoExtractor:
             self.load_config(config_filepath)
         else:
             self.config = {
-                "search_class_types": ["KSampler", "KSamplerAdvanced", "KSampler With Refiner (Fooocus)"],
+                "search_class_types": ["KSampler", "KSamplerAdvanced", "KSampler With Refiner (Fooocus)", "BNK_TiledKSampler"],
                 "output_format": "Steps: {steps}, Sampler: {sampler_name} {scheduler}, CFG scale: {cfg}, Seed: {seed}, Size: {width}x{height}, Model: {model_name}",
             }
         self.info = self.gather_info()
