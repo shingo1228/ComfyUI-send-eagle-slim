@@ -10,6 +10,7 @@ import folder_paths
 
 from .util import util
 from .eagle_api import EagleAPI
+from .prompt_info_extractor import PromptInfoExtractor
 
 FORCE_WRITE_PROMPT = False
 
@@ -32,6 +33,14 @@ class SendEagleWithText:
                 "compression": (
                     "INT",
                     {"default": 80, "min": 1, "max": 100, "step": 1},
+                ),
+                "save_tags": (
+                    "BOOLEAN",
+                    {"default": True, "label_on": "save", "label_off": "none"},
+                ),
+                "filename_template": (
+                    "STRING",
+                    {"multiline": False, "default":"{model}-{width}-{height}-{steps}"},
                 ),
                 "prompt_text": (
                     "STRING",
@@ -59,6 +68,8 @@ class SendEagleWithText:
         images,
         format="webp",
         lossless_webp=False,
+        save_tags=True,
+        filename_template = "{model}-{width}-{height}-{steps}",
         compression=80,
         prompt_text=None,
         negative_text=None,
@@ -83,10 +94,19 @@ class SendEagleWithText:
             file_name = ""
             file_full_path = ""
             width, height = img.size
+            gen_data = PromptInfoExtractor(prompt)
+
+            filename_params = {
+              "width": width,
+              "height": height,
+              "model": os.path.splitext(gen_data.info["model_name"])[0],
+              "steps": gen_data.info["steps"],
+              "seed": gen_data.info["seed"],
+            }
 
             if format == "webp":
                 # Save webp image file
-                file_name = f"{util.get_datetime_str_msec()}-{width}-{height}.webp"
+                file_name = self.get_filename(filename_template, 'webp', filename_params)
                 file_full_path = os.path.join(full_output_folder, file_name)
 
                 exif_data = util.get_exif_from_prompt(
@@ -102,7 +122,7 @@ class SendEagleWithText:
 
             else:
                 # Save png image file
-                file_name = f"{util.get_datetime_str_msec()}-{width}-{height}.png"
+                file_name = self.get_filename(filename_template, 'png', filename_params)
                 file_full_path = os.path.join(full_output_folder, file_name)
                 metadata = PngInfo()
                 if prompt is not None:
@@ -113,14 +133,14 @@ class SendEagleWithText:
 
                 img.save(file_full_path, pnginfo=metadata, compress_level=4)
 
-                util.save_png_image(img, file_full_path, prompt, extra_pnginfo)
-
             # Send image to Eagle
             item = {"path": file_full_path, "name": file_name}
             item["annotation"] = util.make_annotation_text(
                 prompt_text, negative_text, memo_text
             )
-            item["tags"] = util.get_prompt_tags(prompt_text)
+
+            if(save_tags):
+              item["tags"] = util.get_prompt_tags(prompt_text)
 
             _ret = eagle_api.add_item_from_path(data=item)
 
@@ -129,3 +149,17 @@ class SendEagleWithText:
             )
 
         return {"ui": {"images": results}}
+
+
+    def get_filename(self, template:str, ext:str, filename_params) -> str:
+        base = template.format(
+          width = filename_params["width"],
+          height = filename_params["height"],
+          model = filename_params["model"],
+          steps = filename_params["steps"],
+          seed = filename_params["seed"],
+        )
+
+        return f"{util.get_datetime_str_msec()}-{base}.{ext}"
+
+
