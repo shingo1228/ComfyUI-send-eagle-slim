@@ -88,7 +88,7 @@ class PromptInfoExtractor:
             for k, v in self._prompt.items()
             if v["class_type"] in self.config["search_class_types"]
         ]
-        return sorted(ksampler_items, key=lambda x: int(x[0]))
+        return sorted(ksampler_items, key=lambda x: self.get_node_number(x[0]))
 
     def extract_model_name(self, item):
         return (
@@ -233,3 +233,10 @@ class PromptInfoExtractor:
             for item in items
             if re.sub(r"[\(\)]", "", item).strip()
         ]
+
+    def get_node_number(self, key):
+        if ':' in key:
+            tokens = key.split(':')
+            return int(tokens[0]) * 1000 + int(tokens[1])
+        else:
+            return int(key)
