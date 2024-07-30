@@ -10,7 +10,7 @@ def dprint(str):
 
 
 class PromptInfoExtractor:
-    def __init__(self, prompt, config_filepath=None):
+    def __init__(self, prompt, positive=None, negative=None, config_filepath=None):
         """constructor
 
         Args:
@@ -19,6 +19,8 @@ class PromptInfoExtractor:
         """
         #        self.load_data(prompt)
         self._prompt = prompt
+        self._positive = positive
+        self._negative = negative
 
         if DEBUG:
             self._show_data()
@@ -128,8 +130,8 @@ class PromptInfoExtractor:
             return latent_image_info
 
     def extract_prompt_info(self):
-        positive_text = self.extract_text_by_key("positive")
-        negative_text = self.extract_text_by_key("negative")
+        positive_text = self._positive or self.extract_text_by_key("positive")
+        negative_text = self._negative or self.extract_text_by_key("negative")
 
         info_dict = {}
         if positive_text:
