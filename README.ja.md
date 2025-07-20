@@ -58,6 +58,16 @@ ComfyUIでは、処理がそのノードに到達すると、暗黙的に`prompt
 ## インストール
 1. Navigaate to ComfyUI custom nodes directory
 2. `git clone https://github.com/shingo1228/ComfyUI-send-eagle`
+
+## 設定
+本拡張ノードは、一部の設定に `config.json` を使用します。拡張機能のルートディレクトリに `config.json.template` というテンプレートファイルが提供されています。
+
+設定をカスタマイズするには：
+1. `config.json.template` を同じディレクトリ内の `config.json` にコピーします。
+2. `config.json` を編集し、`search_class_types` (プロンプト情報を抽出するノード) や `output_format` (アノテーションテキストのフォーマット) などのパラメータを調整します。
+
+`config.json` が見つからない場合、デフォルト設定が使用されます。
+
 ## 更新
 1. Navigate to the cloned repo e.g. `custom_nodes/ComfyUI-send-eagle`
 2. `git pull`

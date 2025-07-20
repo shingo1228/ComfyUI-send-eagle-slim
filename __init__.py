@@ -1,8 +1,6 @@
-from .send_eagle import SendEagle
-from .send_eagle_with_text import SendEagleWithText
+from .nodes.send_image_to_eagle_node import SendImageToEagleNode
 
 NODE_CLASS_MAPPINGS = {
-    "Send Webp Image to Eagle": SendEagle,
-    "Send Eagle with text": SendEagleWithText,
+    "Send Image to Eagle": SendImageToEagleNode,
 }
 __all__ = ["NODE_CLASS_MAPPINGS"]

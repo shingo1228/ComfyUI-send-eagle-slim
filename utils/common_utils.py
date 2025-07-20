@@ -6,7 +6,7 @@ from PIL import Image
 from datetime import datetime
 
 
-class util:
+class CommonUtils:
     @staticmethod
     def initialize_defaults(prompt, extra_pnginfo):
         util.write_prompt(prompt, extra_pnginfo)

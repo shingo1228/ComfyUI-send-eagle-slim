@@ -54,9 +54,18 @@ In this extension node, we achieve the following functions from the information 
 - Even if the workflow is composed of the above standard nodes, due to the high degree of freedom in ComfyUI configuration, there is a possibility that the expected information cannot be obtained. (In that case, it may be difficult to respond or logically impossible to respond).
 - For nodes other than the above (both standard and extended), I will proceed with operation verification and support from the nodes with the desired features.
 
-## Install
-1. Navigate to the ComfyUI custom nodes directory.
+## Installation
+1. Navigaate to ComfyUI custom nodes directory
 2. `git clone https://github.com/shingo1228/ComfyUI-send-eagle`
+
+## Configuration
+This extension node uses `config.json` for some settings. A template file `config.json.template` is provided in the extension's root directory.
+
+To customize settings:
+1. Copy `config.json.template` to `config.json` in the same directory.
+2. Edit `config.json` to adjust parameters such as `search_class_types` (nodes to extract prompt info from) and `output_format` (format for annotation text).
+
+If `config.json` is not found, default settings will be used.
 
 ## Update
 1. Navigate to the cloned repo e.g. `custom_nodes/ComfyUI-send-eagle`
