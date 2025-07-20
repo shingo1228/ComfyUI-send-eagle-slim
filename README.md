@@ -119,7 +119,7 @@ python tests/integration/run_integration_test.py
 -   **2025/07/20**: Eagleの保存先フォルダを指定する `folder_name` 入力を追加。
 -   **2025/07/20**: ノードUIの `prompt_text` および `negative_text` をオプション入力に変更。
 -   **2025/07/20**: モジュール性と保守性向上のため、プロジェクト構造をリファクタリング。
--   **2025/01/25**: 新規ノード "Send Eagle with text"を追加。
+-   **2024/01/25**: 新規ノード "Send Eagle with text"を追加。
 -   **2023/08/31**: `prompt`、`extra_pnginfo`を**Eagleに送らない（send_promptをdisable）**をデフォルトに変更。
 -   **2023/08/22**: `prompt`情報を解析しEagleに送信するフラグを追加。
 -   **2023/08/18**: `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` に暫定対応。

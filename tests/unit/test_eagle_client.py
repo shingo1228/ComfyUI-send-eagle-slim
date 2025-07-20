@@ -56,7 +56,7 @@ class TestEagleClient(unittest.TestCase):
         folder_id = self.eagle_sender._get_or_create_folder_id("NewRootFolder")
 
         mock_get.assert_called_once()
-        mock_post.assert_called_once_with(f"{self.base_url}/api/folder/create", headers={"Content-Type": "application/json"}, json={"name": "NewRootFolder", "parent": None})
+        mock_post.assert_called_once_with(f"{self.base_url}/api/folder/create", headers={"Content-Type": "application/json"}, json={"name": "NewRootFolder"})
         self.assertEqual(folder_id, "new_root_folder_id")
 
     @patch('requests.post')
@@ -71,8 +71,8 @@ class TestEagleClient(unittest.TestCase):
 
         folder_id = self.eagle_sender._get_or_create_folder_id("ParentFolder/ChildFolder")
 
-        # get_folder_list が2回呼ばれることを確認 (ParentFolderの検索とChildFolderの検索)
-        self.assertEqual(mock_get.call_count, 2)
+        # get_folder_list が1回呼ばれることを確認
+        mock_get.assert_called_once()
         # create_folder が1回呼ばれることを確認
         mock_post.assert_called_once_with(f"{self.base_url}/api/folder/create", headers={"Content-Type": "application/json"}, json={"name": "ChildFolder", "parent": "parent_folder_id"})
         self.assertEqual(folder_id, "child_folder_id")
