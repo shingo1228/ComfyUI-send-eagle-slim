@@ -10,6 +10,12 @@ class EagleAPI:
             data["folderId"] = folder_id
         return self._send_request("/api/item/addFromPath", method="POST", data=data)
 
+    def create_folder(self, name, parent_id=None):
+        data = {"name": name}
+        if parent_id:
+            data["parent"] = parent_id
+        return self._send_request("/api/folder/create", method="POST", data=data)
+
     def get_folder_list(self):
         return self._send_request("/api/folder/list", method="GET")
 
