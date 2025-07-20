@@ -1,4 +1,5 @@
 import requests
+import json
 
 
 class EagleAPI:
@@ -31,5 +32,14 @@ class EagleAPI:
         else:
             raise ValueError(f"Unsupported HTTP method: {method}")
 
-        response.raise_for_status()
-        return response.json()
+        try:
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"[ComfyUI-send-eagle-slim] API Request Error: {e}")
+            print(f"[ComfyUI-send-eagle-slim] Response Text: {response.text}")
+            try:
+                print(f"[ComfyUI-send-eagle-slim] Response JSON: {response.json()}")
+            except json.JSONDecodeError:
+                print("[ComfyUI-send-eagle-slim] Response is not valid JSON.")
+            raise e

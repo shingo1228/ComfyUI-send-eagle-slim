@@ -24,7 +24,6 @@ class SendImageToEagleNode:
                 "lossless_webp": ("BOOLEAN", {"default": False, "label_on": "lossless", "label_off": "lossy"}),
                 "compression": ("INT", {"default": 80, "min": 1, "max": 100, "step": 1}),
                 "folder_name": ("STRING", {"default": "", "multiline": False}),
-                "create_date_folder": ("BOOLEAN", {"default": True, "label_on": "Enabled", "label_off": "Disabled"}),
                 "prompt_text": ("STRING", {"multiline": True}),
                 "negative_text": ("STRING", {"multiline": True}),
                 "memo_text": ("STRING", {"multiline": True}),
@@ -37,7 +36,7 @@ class SendImageToEagleNode:
     OUTPUT_NODE = True
     CATEGORY = "EagleTools"
 
-    def add_item(self, images, format="webp", lossless_webp=False, compression=80, prompt_text=None, negative_text=None, memo_text=None, folder_name="", create_date_folder=True, prompt=None, extra_pnginfo=None):
+    def add_item(self, images, format="webp", lossless_webp=False, compression=80, prompt_text=None, negative_text=None, memo_text=None, folder_name="", prompt=None, extra_pnginfo=None):
         return self.process_and_send(
             images,
             format=format,
@@ -47,7 +46,6 @@ class SendImageToEagleNode:
             negative_text=negative_text,
             memo_text=memo_text,
             folder_name=folder_name,
-            create_date_folder=create_date_folder,
             prompt=prompt,
             extra_pnginfo=extra_pnginfo
         )
@@ -83,15 +81,8 @@ class SendImageToEagleNode:
         results = []
 
         base_folder_name = kwargs.get('folder_name', '')
-        create_date_folder = kwargs.get('create_date_folder', True)
 
         target_folder_path = base_folder_name
-        if create_date_folder:
-            date_str = datetime.now().strftime("%Y%m%d")
-            if target_folder_path:
-                target_folder_path = os.path.join(target_folder_path, date_str)
-            else:
-                target_folder_path = date_str
 
         for image in images:
             filename, annotation, tags = self.prepare_image_data(image, **kwargs)
