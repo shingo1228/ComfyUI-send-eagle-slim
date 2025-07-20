@@ -23,10 +23,10 @@ class SendImageToEagleNode:
                 "format": (["webp", "png"],),
                 "lossless_webp": ("BOOLEAN", {"default": False, "label_on": "lossless", "label_off": "lossy"}),
                 "compression": ("INT", {"default": 80, "min": 1, "max": 100, "step": 1}),
+                "folder_name": ("STRING", {"default": "", "multiline": False}),
                 "prompt_text": ("STRING", {"multiline": True}),
                 "negative_text": ("STRING", {"multiline": True}),
                 "memo_text": ("STRING", {"multiline": True}),
-                "folder_name": ("STRING", {"default": "", "multiline": False}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -61,8 +61,7 @@ class SendImageToEagleNode:
             imgexif = DataFormatter.get_exif_from_prompt(emptyExifData, prompt, extra_pnginfo)
             img.save(filefullpath, quality=compression, exif=imgexif, lossless=lossless)
         else:
-            # util.save_png_image が util.py に存在しないため、シンプルな保存処理に変更
-            img.save(filefullpath)
+            CommonUtils.save_png_image(img, filefullpath, prompt, extra_pnginfo)
 
         return filefullpath
 

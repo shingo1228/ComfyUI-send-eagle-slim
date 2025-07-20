@@ -3,13 +3,14 @@ import json
 import traceback
 import re
 from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 from datetime import datetime
 
 
 class CommonUtils:
     @staticmethod
     def initialize_defaults(prompt, extra_pnginfo):
-        util.write_prompt(prompt, extra_pnginfo)
+        CommonUtils.write_prompt(prompt, extra_pnginfo)
         print("check prompt_decode_err.log")
         traceback.print_exc()
         return "", [], "unknown", "00", "000000"
@@ -98,3 +99,13 @@ class CommonUtils:
             for item in items
             if re.sub(r"[\(\)]", "", item).strip()
         ]
+
+    @staticmethod
+    def save_png_image(img: Image.Image, filefullpath: str, prompt=None, extra_pnginfo=None):
+        metadata = PngInfo()
+        if prompt is not None:
+            metadata.add_text("prompt", json.dumps(prompt))
+        if extra_pnginfo is not None:
+            for x in extra_pnginfo:
+                metadata.add_text(x, json.dumps(extra_pnginfo[x]))
+        img.save(filefullpath, pnginfo=metadata, compress_level=4)
