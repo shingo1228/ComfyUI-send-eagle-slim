@@ -10,6 +10,9 @@ class EagleAPI:
             data["folderId"] = folder_id
         return self._send_request("/api/item/addFromPath", method="POST", data=data)
 
+    def get_folder_list(self):
+        return self._send_request("/api/folder/list", method="GET")
+
     # Private method for sending requests
     def _send_request(self, endpoint, method="GET", data=None):
         url = self.base_url + endpoint

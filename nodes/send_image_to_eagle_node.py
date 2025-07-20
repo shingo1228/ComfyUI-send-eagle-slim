@@ -26,6 +26,7 @@ class SendImageToEagleNode:
                 "prompt_text": ("STRING", {"multiline": True}),
                 "negative_text": ("STRING", {"multiline": True}),
                 "memo_text": ("STRING", {"multiline": True}),
+                "folder_name": ("STRING", {"default": "", "multiline": False}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -35,7 +36,7 @@ class SendImageToEagleNode:
     OUTPUT_NODE = True
     CATEGORY = "EagleTools"
 
-    def add_item(self, images, format="webp", lossless_webp=False, compression=80, prompt_text=None, negative_text=None, memo_text=None, prompt=None, extra_pnginfo=None):
+    def add_item(self, images, format="webp", lossless_webp=False, compression=80, prompt_text=None, negative_text=None, memo_text=None, folder_name="", prompt=None, extra_pnginfo=None):
         return self.process_and_send(
             images,
             format=format,
@@ -44,6 +45,7 @@ class SendImageToEagleNode:
             prompt_text=prompt_text,
             negative_text=negative_text,
             memo_text=memo_text,
+            folder_name=folder_name,
             prompt=prompt,
             extra_pnginfo=extra_pnginfo
         )
@@ -64,9 +66,9 @@ class SendImageToEagleNode:
 
         return filefullpath
 
-    def send_to_eagle(self, filefullpath, filename, annotation, tags):
+    def send_to_eagle(self, filefullpath, filename, annotation, tags, folder_name):
         eagle_sender = EagleSender()
-        return eagle_sender.send_to_eagle(filefullpath, filename, annotation, tags)
+        return eagle_sender.send_to_eagle(filefullpath, filename, annotation, tags, folder_name)
 
     def get_full_output_folder(self):
         subfolder_name = datetime.now().strftime("%Y-%m-%d")
@@ -92,7 +94,7 @@ class SendImageToEagleNode:
                 kwargs.get('extra_pnginfo')
             )
 
-            self.send_to_eagle(filefullpath, filename, annotation, tags)
+            self.send_to_eagle(filefullpath, filename, annotation, tags, kwargs.get('folder_name'))
 
             results.append(
                 {"filename": filename, "subfolder": full_output_folder, "type": self.type}
