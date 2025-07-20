@@ -9,17 +9,18 @@ class EagleSender:
         current_folder_id = None
         path_parts = [part for part in folder_path.split('/') if part]
 
-        for i, part in enumerate(path_parts):
+        try:
+            all_folders = self.eagle_api.get_folder_list().get("data", [])
+        except requests.exceptions.RequestException as e:
+            print(f"[ComfyUI-send-eagle-slim] Error getting folder list from Eagle: {e}")
+            return None # Error, cannot proceed
+
+        for part in path_parts:
             found_id = None
-            try:
-                folders = self.eagle_api.get_folder_list()
-                for folder in folders.get("data", []):
-                    if folder.get("name") == part and (folder.get("parentId") == current_folder_id or (folder.get("parentId") is None and current_folder_id is None)):
-                        found_id = folder.get("id")
-                        break
-            except requests.exceptions.RequestException as e:
-                print(f"[ComfyUI-send-eagle-slim] Error getting folder list from Eagle: {e}")
-                return None # Error, cannot proceed
+            for folder in all_folders:
+                if folder.get("name") == part and (folder.get("parentId") == current_folder_id or (folder.get("parentId") is None and current_folder_id is None)):
+                    found_id = folder.get("id")
+                    break
 
             if found_id:
                 current_folder_id = found_id
@@ -29,6 +30,8 @@ class EagleSender:
                     print(f"[ComfyUI-send-eagle-slim] Creating folder: {part} under parent ID: {current_folder_id}")
                     new_folder = self.eagle_api.create_folder(part, current_folder_id)
                     current_folder_id = new_folder.get("data").get("id")
+                    # Add newly created folder to all_folders to avoid re-creating it in the same run
+                    all_folders.append({"id": current_folder_id, "name": part, "parentId": current_folder_id})
                 except requests.exceptions.RequestException as e:
                     print(f"[ComfyUI-send-eagle-slim] Error creating folder '{part}' in Eagle: {e}")
                     return None # Error, cannot proceed
