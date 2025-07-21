@@ -4,8 +4,6 @@
 
 ComfyUIで生成された画像を、画像管理ソフトウェアEagleに連携するための拡張ノードです。
 
-[日本語版READMEはこちら](README.ja.md)
-
 ## 目次
 
 - [機能](#機能)
@@ -46,7 +44,7 @@ ComfyUIで生成された画像を、画像管理ソフトウェアEagleに連�
 
 ComfyUIのワークフローに `Send Image to Eagle` ノードを追加します。
 
-![](misc/workflow.svg)
+<img src="misc/workflow.svg" alt="EagleでのExif情報表示例" style="width:800px; height:auto;">
 
 ノードの入力ポートに画像を接続し、必要に応じて以下のパラメータを設定します。
 
@@ -61,11 +59,16 @@ ComfyUIのワークフローに `Send Image to Eagle` ノードを追加しま�
 
 **スクリーンショット:**
 
--   ノードの視覚的な表示: ![](misc/sss_node_visual.jpg)
--   Eagleでのアノテーション表示例: ![](misc/sss_annotation.jpg)
--   Eagleでのファイル名表示例: ![](misc/sss_filename.jpg)
--   Eagleでのタグ表示例: ![](misc/sss_tags.jpg)
--   EagleでのExif情報表示例: ![](misc/sss_exif.jpg)
+### カスタムノード
+![ノード](misc/sss_node_visual.jpg)
+### Eagleでのアノテーション表示例
+![アノテーション表示例](misc/sss_annotation.jpg)
+### Eagleでのファイル名表示例
+![ファイル名表示例](misc/sss_filename.jpg)
+### Eagleでのタグ表示例
+![タグ表示例](misc/sss_tags.jpg)
+### Exif情報表示例:
+<img src="misc/sss_exif.jpg" alt="EagleでのExif情報表示例" style="width:512px; height:auto;">
 
 ## 設定
 
@@ -77,24 +80,6 @@ ComfyUIのワークフローに `Send Image to Eagle` ノードを追加しま�
 2.  `config/default_config.json` を編集してパラメータを調整します。
 
 `config/default_config.json` が見つからない場合、デフォルト設定が使用されます。
-
-## テスト
-
-本プロジェクトには、Eagleクライアント機能の単体テストと結合テストが含まれています。
-
-### 単体テストの実行
-
-```bash
-python -m unittest discover tests
-```
-
-### 結合テストの実行
-
-**注意:** 結合テストを実行する前に、Eagleアプリケーションがローカルで起動していることを確認してください。
-
-```bash
-python tests/integration/run_integration_test.py
-```
 
 ## 貢献
 
@@ -109,18 +94,3 @@ python tests/integration/run_integration_test.py
 -   [ComfyUI](https://github.com/comfyanonymous/ComfyUI) の開発者およびコミュニティ
 -   [Eagle](https://en.eagle.cool/) の開発者
 -   前作 [ComfyUI-send-Eagle](https://github.com/shingo1228/ComfyUI-send-eagle) の貢献者
-
-## 変更履歴
-
--   **2025/07/20**: プロジェクトの整理とREADMEの更新。
--   **2025/07/20**: Eagleクライアント機能の単体テストおよび結合テストを追加。
--   **2025/07/20**: APIの制限により、自動フォルダ作成機能をロールバック。
--   **2025/07/20**: メタデータ保持機能を備えたPNG画像保存を実装。
--   **2025/07/20**: Eagleの保存先フォルダを指定する `folder_name` 入力を追加。
--   **2025/07/20**: ノードUIの `prompt_text` および `negative_text` をオプション入力に変更。
--   **2025/07/20**: モジュール性と保守性向上のため、プロジェクト構造をリファクタリング。
--   **2024/01/25**: 新規ノード "Send Eagle with text"を追加。
--   **2023/08/31**: `prompt`、`extra_pnginfo`を**Eagleに送らない（send_promptをdisable）**をデフォルトに変更。
--   **2023/08/22**: `prompt`情報を解析しEagleに送信するフラグを追加。
--   **2023/08/18**: `KSampler With Refiner (Fooocus)`,`SDXL Prompt Styler` に暫定対応。
--   **2023/08/17**: 初期版リリース。
