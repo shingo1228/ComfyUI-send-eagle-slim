@@ -1,96 +1,114 @@
 # ComfyUI-send-Eagle(slim)
 
+**Languages:** [English](README.md) | [日本語](README_ja.md)
+
 [![License](https://img.shields.io/github/license/shingo1228/ComfyUI-send-eagle-slim)](LICENSE)
 
-ComfyUIで生成された画像を、画像管理ソフトウェアEagleに連携するための拡張ノードです。
+A ComfyUI extension node that integrates generated images with Eagle, a powerful image management software.
 
-## 目次
+## Table of Contents
 
-- [機能](#機能)
-- [インストール](#インストール)
-- [使用方法](#使用方法)
-- [設定](#設定)
-- [テスト](#テスト)
-- [貢献](#貢献)
-- [ライセンス](#ライセンス)
-- [謝辞](#謝辞)
-- [変更履歴](#変更履歴)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Changelog](#changelog)
 
-## 機能
+## Features
 
-この拡張ノードは、[ComfyUI](https://github.com/comfyanonymous/ComfyUI) で生成された画像を、ローカルで動作している [Eagle](https://en.eagle.cool/) に送信します。
+This extension node sends images generated in [ComfyUI](https://github.com/comfyanonymous/ComfyUI) to locally running [Eagle](https://en.eagle.cool/).
 
 ![](misc/sss_node_visual.jpg)
 
-- **画像形式の選択**: `webp` または `png` 形式で画像を送信できます。
-  - `webp` 形式では、非可逆圧縮（画質設定）と可逆圧縮を選択可能です。
-- **柔軟なテキスト入力**: `prompt_text`、`negative_text`、`memo_text` を直接入力し、Eagleでのアノテーションやタグとして使用できます。これらの入力はオプションです。
-- **カスタムフォルダ選択**: 画像を保存するEagle内の `folder_name` を指定できます。指定されたフォルダが存在しない場合、画像はEagleのルートフォルダに保存されます。
-- **PNGメタデータ保持**: `png` 形式で画像を保存する場合、ComfyUIのワークフロー情報 (`prompt` および `extra_pnginfo`) がメタデータとして埋め込まれます。これにより、画像をEagleからComfyUIにドラッグ＆ドロップすることで、生成時のワークフローを再現できます。
+- **Image Format Selection**: Send images in `webp` or `png` format.
+  - For `webp` format, choose between lossy compression (with quality settings) and lossless compression.
+- **Flexible Text Input**: Directly input `prompt_text`, `negative_text`, and `memo_text` for use as annotations and tags in Eagle. These inputs are optional.
+- **Custom Folder Selection**: Specify a `folder_name` within Eagle to save images. If the specified folder doesn't exist, images will be saved to Eagle's root folder.
+- **PNG Metadata Preservation**: When saving images in `png` format, ComfyUI workflow information (`prompt` and `extra_pnginfo`) is embedded as metadata. This allows you to recreate the generation workflow by dragging and dropping the image from Eagle back into ComfyUI.
 
-## インストール
+## Installation
 
-1.  ComfyUIの `custom_nodes` ディレクトリに移動します。
-    ```bash
-    cd path/to/ComfyUI/custom_nodes
-    ```
-2.  以下のコマンドでリポジトリをクローンします。
-    ```bash
-    git clone https://github.com/shingo1228/ComfyUI-send-eagle-slim.git
-    ```
-3.  ComfyUIを再起動します。
+1. Navigate to ComfyUI's `custom_nodes` directory.
+   ```bash
+   cd path/to/ComfyUI/custom_nodes
+   ```
+2. Clone this repository with the following command.
+   ```bash
+   git clone https://github.com/shingo1228/ComfyUI-send-eagle-slim.git
+   ```
+3. Restart ComfyUI.
 
-## 使用方法
+## Usage
 
-ComfyUIのワークフローに `Send Image to Eagle` ノードを追加します。
+Add the `Send Image to Eagle` node to your ComfyUI workflow.
 
-<img src="misc/workflow.svg" alt="EagleでのExif情報表示例" style="width:800px; height:auto;">
+<img src="misc/workflow.svg" alt="Workflow Example" style="width:800px; height:auto;">
 
-ノードの入力ポートに画像を接続し、必要に応じて以下のパラメータを設定します。
+Connect an image to the node's input port and configure the following parameters as needed:
 
--   `images`: 送信する画像。
--   `format`: 画像の保存形式 (`webp` または `png`)。
--   `lossless_webp`: `webp` 形式の場合、可逆圧縮を有効にするか（`Enabled`）非可逆圧縮にするか（`Disabled`）。
--   `compression`: `webp` 形式の場合の圧縮品質（1-100）。
--   `folder_name`: Eagle内の保存先フォルダ名（例: `My Project/Generated Images`）。
--   `prompt_text`: 画像に関連付けるプロンプトテキスト。
--   `negative_text`: 画像に関連付けるネガティブプロンプトテキスト。
--   `memo_text`: 画像に関連付けるメモや追加情報。
+- `images`: The image to send.
+- `format`: Image save format (`webp` or `png`).
+- `lossless_webp`: For `webp` format, enable lossless compression (`Enabled`) or use lossy compression (`Disabled`).
+- `compression`: Compression quality for `webp` format (1-100).
+- `folder_name`: Destination folder name within Eagle (e.g., `My Project/Generated Images`).
+- `prompt_text`: Prompt text to associate with the image.
+- `negative_text`: Negative prompt text to associate with the image.
+- `memo_text`: Memo or additional information to associate with the image.
 
-**スクリーンショット:**
+**Screenshots:**
 
-### カスタムノード
-![ノード](misc/sss_node_visual.jpg)
-### Eagleでのアノテーション表示例
-![アノテーション表示例](misc/sss_annotation.jpg)
-### Eagleでのファイル名表示例
-![ファイル名表示例](misc/sss_filename.jpg)
-### Eagleでのタグ表示例
-![タグ表示例](misc/sss_tags.jpg)
-### Exif情報表示例:
-<img src="misc/sss_exif.jpg" alt="EagleでのExif情報表示例" style="width:512px; height:auto;">
+### Custom Node
+![Node](misc/sss_node_visual.jpg)
+### Annotation Display in Eagle
+![Annotation Example](misc/sss_annotation.jpg)
+### Filename Display in Eagle
+![Filename Example](misc/sss_filename.jpg)
+### Tags Display in Eagle
+![Tags Example](misc/sss_tags.jpg)
+### Exif Information Display:
+<img src="misc/sss_exif.jpg" alt="Exif Information in Eagle" style="width:512px; height:auto;">
 
-## 設定
+## Configuration
 
-本拡張ノードは、一部の設定に `config/default_config.json` を使用します。
+This extension node uses `config/default_config.json` for some settings.
 
-設定をカスタマイズするには：
+To customize settings:
 
-1.  `config.json.template` を `config` ディレクトリ内の `config/default_config.json` にコピーします。
-2.  `config/default_config.json` を編集してパラメータを調整します。
+1. Copy `config.json.template` to `config/default_config.json` in the `config` directory.
+2. Edit `config/default_config.json` to adjust parameters.
 
-`config/default_config.json` が見つからない場合、デフォルト設定が使用されます。
+If `config/default_config.json` is not found, default settings will be used.
 
-## 貢献
+## Testing
 
-バグ報告、機能提案、プルリクエストを歓迎します。詳細は [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
+Run the test suite to ensure everything works correctly:
 
-## ライセンス
+```bash
+# Run unit tests
+python -m pytest tests/unit/
 
-本プロジェクトは [MIT License](LICENSE) の下でライセンスされています。
+# Run integration tests
+python tests/integration/run_integration_test.py
+```
 
-## 謝辞
+## Contributing
 
--   [ComfyUI](https://github.com/comfyanonymous/ComfyUI) の開発者およびコミュニティ
--   [Eagle](https://en.eagle.cool/) の開発者
--   前作 [ComfyUI-send-Eagle](https://github.com/shingo1228/ComfyUI-send-eagle) の貢献者
+Bug reports, feature suggestions, and pull requests are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Acknowledgments
+
+- Developers and community of [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
+- Developers of [Eagle](https://en.eagle.cool/)
+- Contributors to the predecessor [ComfyUI-send-Eagle](https://github.com/shingo1228/ComfyUI-send-eagle)
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
